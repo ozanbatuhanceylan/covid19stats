@@ -23,10 +23,13 @@ export default {
             excludeGenericStats.sort(compare);
 
 
-            let output = excludeGenericStats.slice(0, 5);
+            let output = excludeGenericStats.slice(0, 10);
             output.forEach(item => item.cases.active = item.cases.active.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."))
             return output;
-        }
+        },
+        getMapData(state) {
+            
+        },
     },
     actions: {
         async getGenericData({ commit }) {
