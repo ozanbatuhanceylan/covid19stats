@@ -4,6 +4,7 @@ export default {
     namespaced: true,
     state: {
         regions: [],
+        countries: [],
     },
     getters: {
         getActiveTopFiveRegion(state) {
@@ -24,11 +25,26 @@ export default {
 
 
             let output = excludeGenericStats.slice(0, 10);
-            output.forEach(item => item.cases.active = item.cases.active.toString().replace(/\B(?=(\d{3})+(?!\d))/g, "."))
             return output;
         },
         getMapData(state) {
-            
+            let result = [];
+            state.countries.forEach(country => {
+                let isPushed = false;
+                state.regions.find(item => {
+                    if (country.name === item.country) {
+                        result.push([country.alpha2Code.toLowerCase(), item.cases.active]);
+                        isPushed = true;
+                    } else if (item.country === 'USA') {
+                        result.push(['us', item.cases.active]);
+                        isPushed = true;
+                    }
+                })
+                if (!isPushed) {
+                    result.push([country.alpha2Code.toLowerCase(), 0]);
+                }
+            })
+            return result;
         },
     },
     actions: {
@@ -42,11 +58,25 @@ export default {
                 }).then(response => {
                     commit('SET_REGIONS', response.data.response)
                 })
+        },
+        getCountries({ commit }) {
+            return axios
+                .get('https://ajayakv-rest-countries-v1.p.rapidapi.com/rest/v1/all', {
+                    "headers": {
+                        "x-rapidapi-host": "ajayakv-rest-countries-v1.p.rapidapi.com",
+                        "x-rapidapi-key": "ad55aff761msha31dd47ef2b0829p1e8311jsnac302b57d671"
+                    }
+                }).then(response => {
+                    commit('SET_COUNTRIES', response.data)
+                })
         }
     },
     mutations: {
         SET_REGIONS(state, data) {
             state.regions = data;
+        },
+        SET_COUNTRIES(state, data) {
+            state.countries = data
         }
     }
 }
